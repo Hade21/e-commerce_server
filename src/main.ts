@@ -3,6 +3,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import config from "./config/config";
+import authRoute from "./routes/authRoutes";
 
 function app() {
   const app = express();
@@ -12,6 +13,7 @@ function app() {
   app.use(cors());
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+  app.use("/api/v1/user/", authRoute);
 
   mongoose.set("strictQuery", true);
   mongoose
