@@ -63,3 +63,41 @@ export const getUserDetail = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+//update User
+export const updateUser = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const { firstName, lastName, phone, email } = req.body;
+    const password = await bcrypt.hash(req.body.password, 12);
+    const findUser = await user.findByIdAndUpdate(
+      id,
+      {
+        firstName,
+        lastName,
+        email,
+        phone,
+        password,
+      },
+      {
+        new: true,
+      }
+    );
+    res
+      .status(200)
+      .json({ message: "Profile update succesfully", user: findUser });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+//delete User
+export const deleteUser = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const findUser = await user.findByIdAndDelete(id);
+    res.status(200).json({ message: "User deleted succesfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
