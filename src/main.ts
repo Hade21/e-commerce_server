@@ -3,7 +3,9 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import config from "./config/config";
-import authRoute from "./routes/authRoutes";
+import authRoute from "./routes/userRoutes";
+import { notFound } from "./middleware/notFound";
+import helmet from "helmet";
 
 function app() {
   const app = express();
@@ -11,9 +13,13 @@ function app() {
   const MONGO_URI: string = config.MONGO_URI;
 
   app.use(cors());
+  app.use(helmet());
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+
   app.use("/api/v1/user/", authRoute);
+
+  app.use(notFound);
 
   mongoose.set("strictQuery", true);
   mongoose
