@@ -49,29 +49,39 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
+//get All User
+export const getAllUser = async (req: Request, res: Response) => {
+  try {
+    const users = await user.find();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
 //get User detail
 export const getUserDetail = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { _id } = req.params;
   try {
-    const findUser = await user.findById({ id });
+    const findUser = await user.findById({ _id });
     if (!findUser) {
       res.status(404).json({ message: "User not found" });
     } else {
       res.status(200).json({ message: "User found", user: findUser });
     }
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "Something went wrong", error });
   }
 };
 
 //update User
 export const updateUser = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { _id } = req.params;
   try {
     const { firstName, lastName, phone, email } = req.body;
     const password = await bcrypt.hash(req.body.password, 12);
     const findUser = await user.findByIdAndUpdate(
-      id,
+      _id,
       {
         firstName,
         lastName,
@@ -93,10 +103,42 @@ export const updateUser = async (req: Request, res: Response) => {
 
 //delete User
 export const deleteUser = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { _id } = req.params;
   try {
-    const findUser = await user.findByIdAndDelete(id);
+    const findUser = await user.findByIdAndDelete({ _id });
     res.status(200).json({ message: "User deleted succesfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+//block user
+export const blockUser = async (req: Request, res: Response) => {
+  const { _id } = req.params;
+  try {
+    const findUser = await user.findByIdAndUpdate(
+      _id,
+      {
+        isBlocked: true,
+      },
+      { new: true }
+    );
+    res.status(200).json({ message: "Blocked succesfully", findUser });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+//unblock user
+export const unblockUser = async (req: Request, res: Response) => {
+  const { _id } = req.params;
+  try {
+    const findUser = await user.findByIdAndUpdate(
+      _id,
+      { isBlocked: false },
+      { new: true }
+    );
+    res.status(200).json({ message: "Unblock successfully", findUser });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
   }
