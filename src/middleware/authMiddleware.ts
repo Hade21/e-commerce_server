@@ -38,3 +38,9 @@ export const isAdmin = async (
     next();
   }
 };
+
+export const verifyRefreshToken = (token: string) => {
+  const secretKey: Secret = config.REFRESH_TOKEN;
+  const decoded = jwt.verify(token, secretKey) as Payload;
+  return decoded;
+};

@@ -6,20 +6,22 @@ import {
   deleteUser,
   getAllUser,
   getUserDetail,
+  handleRefreshToken,
   loginUser,
   unblockUser,
   updateUser,
 } from "../controller/userController";
 
-const route = express.Router();
+const router = express.Router();
 
-route.post("/register", createUser);
-route.post("/login", loginUser);
-route.get("/all-user", authMiddleware, isAdmin, getAllUser);
-route.get("/:id", authMiddleware, getUserDetail);
-route.put("/:id", authMiddleware, updateUser);
-route.put("/block-user/:id", authMiddleware, isAdmin, blockUser);
-route.put("/unblock-user/:id", authMiddleware, isAdmin, unblockUser);
-route.delete("/:id", authMiddleware, deleteUser);
+router.post("/register", createUser);
+router.post("/login", loginUser);
+router.get("/all-user", authMiddleware, isAdmin, getAllUser);
+router.get("/refresh", handleRefreshToken);
+router.get("/:_id", authMiddleware, getUserDetail);
+router.put("/:_id", authMiddleware, updateUser);
+router.put("/block-user/:_id", authMiddleware, isAdmin, blockUser);
+router.put("/unblock-user/:_id", authMiddleware, isAdmin, unblockUser);
+router.delete("/:_id", authMiddleware, deleteUser);
 
-export default route;
+export default router;

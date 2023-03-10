@@ -8,6 +8,7 @@ interface ENV {
   PORT: number | undefined;
   MONGO_URI: string | undefined;
   ACCESS_TOKEN: string | undefined;
+  REFRESH_TOKEN: string | undefined;
 }
 
 interface Config {
@@ -15,6 +16,7 @@ interface Config {
   PORT: number;
   MONGO_URI: string;
   ACCESS_TOKEN: string;
+  REFRESH_TOKEN: string;
 }
 
 const getConfig = (): ENV => {
@@ -23,6 +25,7 @@ const getConfig = (): ENV => {
     PORT: process.env.PORT ? Number(process.env.PORT) : undefined,
     MONGO_URI: process.env.MONGO_URI,
     ACCESS_TOKEN: process.env.ACCESS_TOKEN,
+    REFRESH_TOKEN: process.env.REFRESH_TOKEN,
   };
 };
 

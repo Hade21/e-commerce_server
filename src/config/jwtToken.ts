@@ -7,3 +7,10 @@ export const generateToken = (id: string) => {
     algorithm: "HS256",
   });
 };
+
+export const generateRefereshToken = (id: string) => {
+  return jwt.sign({ id }, config.REFRESH_TOKEN, {
+    expiresIn: "1d",
+    algorithm: "HS256",
+  });
+};

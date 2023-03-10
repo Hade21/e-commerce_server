@@ -4,8 +4,9 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import config from "./config/config";
 import authRoute from "./routes/userRoutes";
-import { notFound } from "./middleware/notFound";
+import { errorMiddleware, notFound } from "./middleware/errorHandling";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 
 function app() {
   const app = express();
@@ -16,10 +17,12 @@ function app() {
   app.use(helmet());
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+  app.use(cookieParser());
 
   app.use("/api/v1/user/", authRoute);
 
   app.use(notFound);
+  app.use(errorMiddleware);
 
   mongoose.set("strictQuery", true);
   mongoose
