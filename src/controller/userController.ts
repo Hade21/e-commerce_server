@@ -169,7 +169,7 @@ export const unblockUser = async (req: Request, res: Response) => {
 export const handleRefreshToken = async (req: Request, res: Response) => {
   const cookie = req.cookies;
   if (!cookie?.refreshToken)
-    return res.status(401).json({ message: "No token attached" });
+    return res.status(400).json({ message: "No token attached" });
   const findUser = await user.findOne({ refreshToken: cookie.refreshToken });
   if (!findUser) return res.status(401).json({ message: "Token not match" });
   const decoded = verifyRefreshToken(cookie.refreshToken);
@@ -181,4 +181,27 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
     const accessToken = generateToken(decoded.id);
     return res.status(200).json({ accessToken });
   }
+};
+
+//logout
+export const logout = async (req: Request, res: Response) => {
+  const refreshToken = req.cookies?.refreshToken;
+  if (!refreshToken)
+    return res.status(400).json({ message: "No token attached" });
+  const findUser = await user.findOne({ refreshToken });
+  if (!findUser) {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+    });
+    return res.status(204);
+  }
+  await user.findOneAndUpdate(refreshToken, {
+    refreshToken: "",
+  });
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+  });
+  return res.status(200).json({ message: "User logged out" });
 };

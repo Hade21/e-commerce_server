@@ -8,6 +8,7 @@ import {
   getUserDetail,
   handleRefreshToken,
   loginUser,
+  logout,
   unblockUser,
   updateUser,
 } from "../controller/userController";
@@ -18,6 +19,7 @@ router.post("/register", createUser);
 router.post("/login", loginUser);
 router.get("/all-user", authMiddleware, isAdmin, getAllUser);
 router.get("/refresh", handleRefreshToken);
+router.get("/logout", logout);
 router.get("/:_id", authMiddleware, getUserDetail);
 router.put("/:_id", authMiddleware, updateUser);
 router.put("/block-user/:_id", authMiddleware, isAdmin, blockUser);
