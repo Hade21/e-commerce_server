@@ -3,7 +3,8 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import config from "./config/config";
-import authRoute from "./routes/userRoutes";
+import userRoute from "./routes/userRoutes";
+import productRoute from "./routes/productRoutes";
 import { errorMiddleware, notFound } from "./middleware/errorHandling";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -19,7 +20,8 @@ function app() {
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
   app.use(cookieParser());
 
-  app.use("/api/v1/user/", authRoute);
+  app.use("/api/v1/user", userRoute);
+  app.use("/api/v1/product", productRoute);
 
   app.use(notFound);
   app.use(errorMiddleware);
