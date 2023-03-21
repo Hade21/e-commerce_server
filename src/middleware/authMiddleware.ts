@@ -44,3 +44,19 @@ export const verifyRefreshToken = (token: string) => {
   const decoded = jwt.verify(token, secretKey) as Payload;
   return decoded;
 };
+
+export const isSeller = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id: _id } = (req as CustomRequest).user as Payload;
+  const findUser = await user.findById({ _id });
+  if (findUser?.role === "user") {
+    return res
+      .status(203)
+      .json({ message: "You are not allowed to change product" });
+  } else {
+    next();
+  }
+};

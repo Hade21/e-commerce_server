@@ -22,24 +22,29 @@ const productSchema = new mongoose.Schema(
       require: true,
     },
     category: {
-      type: mongoose.Types.ObjectId,
-      ref: "Category",
+      type: String,
+      require: true,
     },
     brand: {
       type: String,
-      enum: ["Samsung", "Apple", "Lenovo"],
+      require: true,
+      lowercase: true,
     },
-    stocks: Number,
+    stocks: {
+      type: Number,
+      require: true,
+    },
     itemSold: {
       type: Number,
       default: 0,
+      select: false,
     },
     images: {
       type: Array,
     },
     color: {
       type: String,
-      enum: ["Black", "Red", "Brown"],
+      require: true,
     },
     ratings: [
       {

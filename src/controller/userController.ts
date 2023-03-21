@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import user from "../model/userModel";
+import User from "../model/userModel";
 import { generateToken, generateRefereshToken } from "../config/jwtToken";
 import { verifyRefreshToken } from "../middleware/authMiddleware";
 
@@ -8,11 +8,11 @@ import { verifyRefreshToken } from "../middleware/authMiddleware";
 export const createUser = async (req: Request, res: Response) => {
   const { firstName, lastName, phone, email } = req.body;
   const password = await bcrypt.hash(req.body.password, 12);
-  const emailExist = await user.findOne({ email });
-  const phoneExist = await user.findOne({ phone });
+  const emailExist = await User.findOne({ email });
+  const phoneExist = await User.findOne({ phone });
   try {
     if (!emailExist && !phoneExist) {
-      const newUser = await user.create({
+      const newUser = await User.create({
         firstName,
         lastName,
         phone,
@@ -37,7 +37,7 @@ export const createUser = async (req: Request, res: Response) => {
 //login User
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  const findUser = await user.findOne({ email });
+  const findUser = await User.findOne({ email });
   try {
     if (!findUser) {
       res.status(404).json({ message: "User not found" });
@@ -46,7 +46,7 @@ export const loginUser = async (req: Request, res: Response) => {
       if (match) {
         const token = generateToken(findUser._id.toString());
         const refreshToken = generateRefereshToken(findUser._id.toString());
-        const updateUser = await user.findByIdAndUpdate(
+        const updateUser = await User.findByIdAndUpdate(
           findUser._id,
           { refreshToken: refreshToken },
           { new: true }
@@ -69,7 +69,7 @@ export const loginUser = async (req: Request, res: Response) => {
 //get All User
 export const getAllUser = async (req: Request, res: Response) => {
   try {
-    const users = await user.find();
+    const users = await User.find();
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
@@ -80,7 +80,7 @@ export const getAllUser = async (req: Request, res: Response) => {
 export const getUserDetail = async (req: Request, res: Response) => {
   const { _id } = req.params;
   try {
-    const findUser = await user.findById({ _id });
+    const findUser = await User.findById({ _id });
     if (!findUser) {
       res.status(404).json({ message: "User not found" });
     } else {
@@ -97,7 +97,7 @@ export const updateUser = async (req: Request, res: Response) => {
   try {
     const { firstName, lastName, phone, email, role } = req.body;
     const password = await bcrypt.hash(req.body.password, 12);
-    const findUser = await user.findByIdAndUpdate(
+    const findUser = await User.findByIdAndUpdate(
       _id,
       {
         firstName,
@@ -123,7 +123,7 @@ export const updateUser = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   const { _id } = req.params;
   try {
-    const findUser = await user.findByIdAndDelete({ _id });
+    const findUser = await User.findByIdAndDelete({ _id });
     res.status(200).json({ message: "User deleted succesfully", findUser });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
@@ -134,7 +134,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 export const blockUser = async (req: Request, res: Response) => {
   const { _id } = req.params;
   try {
-    const findUser = await user.findByIdAndUpdate(
+    const findUser = await User.findByIdAndUpdate(
       _id,
       {
         isBlocked: true,
@@ -154,7 +154,7 @@ export const blockUser = async (req: Request, res: Response) => {
 export const unblockUser = async (req: Request, res: Response) => {
   const { _id } = req.params;
   try {
-    const findUser = await user.findByIdAndUpdate(
+    const findUser = await User.findByIdAndUpdate(
       _id,
       { isBlocked: false },
       { new: true }
@@ -170,7 +170,7 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
   const cookie = req.cookies;
   if (!cookie?.refreshToken)
     return res.status(400).json({ message: "No token attached" });
-  const findUser = await user.findOne({ refreshToken: cookie.refreshToken });
+  const findUser = await User.findOne({ refreshToken: cookie.refreshToken });
   if (!findUser) return res.status(401).json({ message: "Token not match" });
   const decoded = verifyRefreshToken(cookie.refreshToken);
   if (!decoded) {
@@ -188,7 +188,7 @@ export const logout = async (req: Request, res: Response) => {
   const refreshToken = req.cookies?.refreshToken;
   if (!refreshToken)
     return res.status(400).json({ message: "No token attached" });
-  const findUser = await user.findOne({ refreshToken });
+  const findUser = await User.findOne({ refreshToken });
   if (!findUser) {
     res.clearCookie("refreshToken", {
       httpOnly: true,
@@ -196,7 +196,7 @@ export const logout = async (req: Request, res: Response) => {
     });
     return res.status(204);
   }
-  await user.findOneAndUpdate(refreshToken, {
+  await User.findOneAndUpdate(refreshToken, {
     refreshToken: "",
   });
   res.clearCookie("refreshToken", {
