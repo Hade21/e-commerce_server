@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import User from "../model/userModel";
 import { generateToken, generateRefereshToken } from "../config/jwtToken";
 import { verifyRefreshToken } from "../middleware/authMiddleware";
+import { CustomRequest, Payload } from "global";
 
 //register User
 export const createUser = async (req: Request, res: Response) => {
@@ -23,14 +24,16 @@ export const createUser = async (req: Request, res: Response) => {
         .status(201)
         .json({ message: "User created successfully", user: newUser });
     } else if (emailExist) {
-      res.status(422).json({ message: "Email has taken, please sign in" });
+      return res
+        .status(422)
+        .json({ message: "Email has taken, please sign in" });
     } else {
-      res
+      return res
         .status(422)
         .json({ message: "Phone number has taken, please siign in" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong", error });
+    return res.status(500).json({ message: "Something went wrong", error });
   }
 };
 
@@ -40,7 +43,7 @@ export const loginUser = async (req: Request, res: Response) => {
   const findUser = await User.findOne({ email });
   try {
     if (!findUser) {
-      res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     } else {
       const match = await bcrypt.compare(password, findUser.password);
       if (match) {
@@ -55,9 +58,11 @@ export const loginUser = async (req: Request, res: Response) => {
           httpOnly: true,
           maxAge: 24 * 60 * 60 * 1000,
         });
-        res.status(200).json({ message: "User logged in successfully", token });
+        return res
+          .status(200)
+          .json({ message: "User logged in successfully", token });
       } else {
-        res.status(401).json({ message: "Incorrect password" });
+        return res.status(401).json({ message: "Incorrect password" });
       }
     }
   } catch (error) {
@@ -70,9 +75,9 @@ export const loginUser = async (req: Request, res: Response) => {
 export const getAllUser = async (req: Request, res: Response) => {
   try {
     const users = await User.find();
-    res.status(200).json(users);
+    return res.status(200).json(users);
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -82,12 +87,12 @@ export const getUserDetail = async (req: Request, res: Response) => {
   try {
     const findUser = await User.findById({ _id });
     if (!findUser) {
-      res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     } else {
-      res.status(200).json({ message: "User found", user: findUser });
+      return res.status(200).json({ message: "User found", user: findUser });
     }
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong", error });
+    return res.status(500).json({ message: "Something went wrong", error });
   }
 };
 
@@ -96,7 +101,6 @@ export const updateUser = async (req: Request, res: Response) => {
   const { _id } = req.params;
   try {
     const { firstName, lastName, phone, email, role } = req.body;
-    const password = await bcrypt.hash(req.body.password, 12);
     const findUser = await User.findByIdAndUpdate(
       _id,
       {
@@ -104,18 +108,15 @@ export const updateUser = async (req: Request, res: Response) => {
         lastName,
         email,
         phone,
-        password,
         role,
       },
       {
         new: true,
       }
     );
-    res
-      .status(200)
-      .json({ message: "Profile update succesfully", user: findUser });
+    return res.status(200).json({ message: "Profile update succesfully" });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -124,9 +125,11 @@ export const deleteUser = async (req: Request, res: Response) => {
   const { _id } = req.params;
   try {
     const findUser = await User.findByIdAndDelete({ _id });
-    res.status(200).json({ message: "User deleted succesfully", findUser });
+    return res
+      .status(200)
+      .json({ message: "User deleted succesfully", findUser });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -144,9 +147,9 @@ export const blockUser = async (req: Request, res: Response) => {
       }
     );
     console.log(findUser);
-    res.status(200).json({ message: "Blocked succesfully", findUser });
+    return res.status(200).json({ message: "Blocked succesfully", findUser });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -159,9 +162,9 @@ export const unblockUser = async (req: Request, res: Response) => {
       { isBlocked: false },
       { new: true }
     );
-    res.status(200).json({ message: "Unblock successfully", findUser });
+    return res.status(200).json({ message: "Unblock successfully", findUser });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -204,4 +207,20 @@ export const logout = async (req: Request, res: Response) => {
     secure: true,
   });
   return res.status(200).json({ message: "User logged out" });
+};
+
+//update password
+export const updatePassword = async (req: Request, res: Response) => {
+  const { id } = (req as CustomRequest).user as Payload;
+  const password = req.body;
+  const user = await User.findById(id);
+  if (password.newPassword !== password.confirmPassword) {
+    return res.status(400).json({ message: "Password not match" });
+  } else {
+    user!.password = password.newPassword;
+    const updatedPAssword = user?.save();
+    return res
+      .status(200)
+      .json({ message: "Password updated successfully", updatedPAssword });
+  }
 };

@@ -10,6 +10,7 @@ import {
   loginUser,
   logout,
   unblockUser,
+  updatePassword,
   updateUser,
 } from "../controller/userController";
 
@@ -21,6 +22,7 @@ router.get("/all-user", authMiddleware, isAdmin, getAllUser);
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logout);
 router.get("/:_id", authMiddleware, getUserDetail);
+router.put("/updatePassword", authMiddleware, updatePassword);
 router.put("/:_id", authMiddleware, updateUser);
 router.put("/block-user/:_id", authMiddleware, isAdmin, blockUser);
 router.put("/unblock-user/:_id", authMiddleware, isAdmin, unblockUser);
