@@ -210,17 +210,18 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 //update password
-export const updatePassword = async (req: Request, res: Response) => {
-  const { id } = (req as CustomRequest).user as Payload;
+export const updatePassword = async (req: CustomRequest, res: Response) => {
+  const { id } = req.user as Payload;
   const password = req.body;
   const user = await User.findById(id);
+  if (!user) return res.status(404).json({ message: "User not found" });
   if (password.newPassword !== password.confirmPassword) {
     return res.status(400).json({ message: "Password not match" });
   } else {
     user!.password = password.newPassword;
-    const updatedPAssword = user?.save();
+    const updatedPassword = user?.save();
     return res
       .status(200)
-      .json({ message: "Password updated successfully", updatedPAssword });
+      .json({ message: "Password updated successfully", updatedPassword });
   }
 };
