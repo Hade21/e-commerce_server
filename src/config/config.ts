@@ -9,6 +9,8 @@ interface ENV {
   MONGO_URI: string | undefined;
   ACCESS_TOKEN: string | undefined;
   REFRESH_TOKEN: string | undefined;
+  MAIL_ID: string | undefined;
+  MAIL_PASSWORD: string | undefined;
 }
 
 interface Config {
@@ -17,6 +19,8 @@ interface Config {
   MONGO_URI: string;
   ACCESS_TOKEN: string;
   REFRESH_TOKEN: string;
+  MAIL_ID: string;
+  MAIL_PASSWORD: string;
 }
 
 const getConfig = (): ENV => {
@@ -26,6 +30,8 @@ const getConfig = (): ENV => {
     MONGO_URI: process.env.MONGO_URI,
     ACCESS_TOKEN: process.env.ACCESS_TOKEN,
     REFRESH_TOKEN: process.env.REFRESH_TOKEN,
+    MAIL_ID: process.env.MAIL_ID,
+    MAIL_PASSWORD: process.env.MAIL_PASSWORD,
   };
 };
 
