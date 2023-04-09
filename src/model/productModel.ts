@@ -4,35 +4,35 @@ const productSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      require: true,
+      required: true,
       trim: true,
     },
     slug: {
       type: String,
-      require: true,
+      required: true,
       unique: true,
       lowercase: true,
     },
     description: {
       type: String,
-      require: true,
+      required: true,
     },
     price: {
       type: Number,
-      require: true,
+      required: true,
     },
     category: {
       type: String,
-      require: true,
+      required: true,
     },
     brand: {
       type: String,
-      require: true,
+      required: true,
       lowercase: true,
     },
     stocks: {
       type: Number,
-      require: true,
+      required: true,
     },
     itemSold: {
       type: Number,
@@ -44,7 +44,7 @@ const productSchema = new mongoose.Schema(
     },
     color: {
       type: String,
-      require: true,
+      required: true,
     },
     ratings: [
       {
