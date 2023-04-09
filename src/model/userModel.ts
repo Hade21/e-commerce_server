@@ -41,9 +41,9 @@ const userSchema = new mongoose.Schema(
     address: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     refreshToken: { type: String },
-    passwordChangedAt: { type: Date },
-    passwordResetToken: { type: String },
-    passwordResetExpires: { type: Date },
+    passwordChangedAt: Number,
+    passwordResetToken: String,
+    passwordResetExpires: Number,
   },
   {
     timestamps: true,
@@ -55,16 +55,5 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
-userSchema.methods.createPasswordResetToken = async function () {
-  const resetToken = crypto.randomBytes(32).toString("hex");
-  this.passwordResetToken = crypto
-    .createHash("sha256")
-    .update(resetToken)
-    .digest("hex");
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-  return resetToken;
-};
 
-const userModel = mongoose.model("user", userSchema);
-
-export default userModel;
+export const userModel = mongoose.model("user", userSchema);

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import User from "../model/userModel";
+import { userModel as User } from "../model/userModel";
 import { generateToken, generateRefereshToken } from "../config/jwtToken";
 import { verifyRefreshToken } from "../middleware/authMiddleware";
 import { CustomRequest, Payload } from "global";
@@ -234,7 +234,12 @@ export const forgotPasswordToken = async (req: Request, res: Response) => {
   const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ message: "User not found" });
   try {
-    const token = await User.schema.methods.createPasswordResetToken();
+    const token = crypto.randomBytes(32).toString("hex");
+    user.passwordResetToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
     const resetURL = `Hi, Please follow this link to reset your password. This link is valid for 10 minutes from now <a href='http:localhost/api/user/reset-password/${token}'>Click here</a>`;
     const data = {
@@ -243,7 +248,7 @@ export const forgotPasswordToken = async (req: Request, res: Response) => {
       html: resetURL,
       text: `Hey ${user.lastName}, if you didn't request this password reset just ignore this email`,
     };
-    sendEmail(data);
+    // sendEmail(data);
     return res.status(200).json({ token });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
@@ -252,7 +257,7 @@ export const forgotPasswordToken = async (req: Request, res: Response) => {
 
 export const resetPassword = async (req: Request, res: Response) => {
   const { newPassword, confirmPassword } = req.body;
-  const token = req.params.toString();
+  const token: string = req.params.token;
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
   const user = await User.findOne({
     passwordResetToken: hashedToken,
