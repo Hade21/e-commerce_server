@@ -41,9 +41,9 @@ const userSchema = new mongoose.Schema(
     address: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     refreshToken: { type: String },
-    passwordChangedAt: { type: Date },
-    passwordResetToken: { type: String },
-    passwordResetExpires: { type: Date },
+    passwordChangedAt: Number,
+    passwordResetToken: String,
+    passwordResetExpires: Number,
   },
   {
     timestamps: true,
@@ -56,6 +56,4 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-const userModel = mongoose.model("user", userSchema);
-
-export default userModel;
+export const userModel = mongoose.model("user", userSchema);

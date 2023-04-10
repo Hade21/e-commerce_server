@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import User from "../model/userModel";
+import { userModel as User } from "../model/userModel";
 import { generateToken, generateRefereshToken } from "../config/jwtToken";
 import { verifyRefreshToken } from "../middleware/authMiddleware";
 import { CustomRequest, Payload } from "global";
+import { sendEmail } from "./emailController";
+import crypto from "crypto";
 
 //register User
 export const createUser = async (req: Request, res: Response) => {
@@ -212,16 +214,62 @@ export const logout = async (req: Request, res: Response) => {
 //update password
 export const updatePassword = async (req: CustomRequest, res: Response) => {
   const { id } = req.user as Payload;
-  const password = req.body;
+  const { newPassword, confirmPassword } = req.body;
   const user = await User.findById(id);
   if (!user) return res.status(404).json({ message: "User not found" });
-  if (password.newPassword !== password.confirmPassword) {
+  if (newPassword !== confirmPassword) {
     return res.status(400).json({ message: "Password not match" });
   } else {
-    user!.password = password.newPassword;
+    user!.password = newPassword;
     const updatedPassword = user?.save();
     return res
       .status(200)
       .json({ message: "Password updated successfully", updatedPassword });
   }
+};
+
+//forgot password
+export const forgotPasswordToken = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ message: "User not found" });
+  try {
+    const token = crypto.randomBytes(32).toString("hex");
+    user.passwordResetToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+    await user.save();
+    const resetURL = `Hi, Please follow this link to reset your password. This link is valid for 10 minutes from now <a href='http:localhost/api/user/reset-password/${token}'>Click here</a>`;
+    const data = {
+      to: email,
+      subject: "Reset Password Link",
+      html: resetURL,
+      text: `Hey ${user.lastName}, if you didn't request this password reset just ignore this email`,
+    };
+    // sendEmail(data);
+    return res.status(200).json({ token });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const { newPassword, confirmPassword } = req.body;
+  const token: string = req.params.token;
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  if (!user)
+    return res.status(401).json({ message: "Token expired, please try again" });
+  if (newPassword !== confirmPassword)
+    return res.status(400).json({ message: "Password didn't match" });
+  user.password = newPassword;
+  (user.passwordResetToken = undefined),
+    (user.passwordResetExpires = undefined);
+  await user.save();
+  res.status(200).json({ message: "Password updated succesfully" });
 };

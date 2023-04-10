@@ -4,11 +4,13 @@ import {
   blockUser,
   createUser,
   deleteUser,
+  forgotPasswordToken,
   getAllUser,
   getUserDetail,
   handleRefreshToken,
   loginUser,
   logout,
+  resetPassword,
   unblockUser,
   updatePassword,
   updateUser,
@@ -18,6 +20,8 @@ const router = express.Router();
 
 router.post("/register", createUser);
 router.post("/login", loginUser);
+router.post("/forgot-password-token", forgotPasswordToken);
+router.post("/reset-password/:token", resetPassword);
 router.get("/all-user", authMiddleware, isAdmin, getAllUser);
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logout);

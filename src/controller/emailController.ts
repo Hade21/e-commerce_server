@@ -1,9 +1,8 @@
 import nodemailer from "nodemailer";
-import { Request, Response } from "express";
 import config from "../config/config";
 import { IData } from "global";
 
-export const sendEmail = async (data: IData, req: Request, res: Response) => {
+export const sendEmail = async (data: IData) => {
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
