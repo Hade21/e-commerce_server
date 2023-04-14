@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { userModel as User } from "../model/userModel";
+import User from "../model/userModel";
 import { generateToken, generateRefereshToken } from "../config/jwtToken";
 import { verifyRefreshToken } from "../middleware/authMiddleware";
 import { CustomRequest, Payload } from "global";
@@ -248,7 +248,7 @@ export const forgotPasswordToken = async (req: Request, res: Response) => {
       html: resetURL,
       text: `Hey ${user.lastName}, if you didn't request this password reset just ignore this email`,
     };
-    // sendEmail(data);
+    sendEmail(data);
     return res.status(200).json({ token });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
