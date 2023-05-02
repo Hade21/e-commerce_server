@@ -10,3 +10,13 @@ export const createBlog = async (req: Request, res: Response) => {
     return res.status(400).json(error);
   }
 };
+
+export const updateBlog = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const updatedBlog = Blog.findByIdAndUpdate(id, req.body, { new: true });
+    return res.status(200).json({ message: "Blog updated", updatedBlog });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
