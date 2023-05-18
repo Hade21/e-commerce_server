@@ -44,7 +44,9 @@ export const getBlogById = async (req: Request, res: Response) => {
       id,
       { numViews: post!.numViews + 1 },
       { new: true }
-    );
+    )
+      .populate("likes")
+      .populate("dislikes");
     return res.status(200).json({ message: "Article found", updatedPost });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
@@ -97,6 +99,49 @@ export const likeBlog = async (req: CustomRequest, res: Response) => {
       {
         $push: { likes: loginUserId },
         isLiked: true,
+      },
+      { new: true }
+    );
+    return res.status(200).json({ blog });
+  }
+};
+//dislike post
+export const dislikeBlog = async (req: CustomRequest, res: Response) => {
+  const { id: blogId } = req.params;
+  const blog = await Blog.findById(blogId);
+  const { id: loginUserId } = req.user as Payload;
+  const isDisliked = blog?.isDisliked;
+
+  const alreadyLiked = blog?.likes.find(
+    (userId) => userId.toString() === loginUserId.toString()
+  );
+
+  if (alreadyLiked) {
+    const blog = await Blog.findByIdAndUpdate(
+      blogId,
+      {
+        $pull: { likes: loginUserId },
+        isLiked: false,
+      },
+      { new: true }
+    );
+    return res.status(200).json({ blog });
+  } else if (isDisliked) {
+    const blog = await Blog.findByIdAndUpdate(
+      blogId,
+      {
+        $pull: { dislikes: loginUserId },
+        isDisliked: false,
+      },
+      { new: true }
+    );
+    return res.status(200).json({ blog });
+  } else {
+    const blog = await Blog.findByIdAndUpdate(
+      blogId,
+      {
+        $push: { dislikes: loginUserId },
+        isDisliked: true,
       },
       { new: true }
     );

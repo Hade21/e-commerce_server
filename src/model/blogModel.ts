@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const blogShema = new mongoose.Schema(
   {
@@ -8,8 +8,8 @@ const blogShema = new mongoose.Schema(
     numViews: { type: Number, default: 0 },
     isLiked: { type: Boolean, default: false },
     isDisliked: { type: Boolean, default: false },
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+    dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
     images: {
       type: String,
       default:
