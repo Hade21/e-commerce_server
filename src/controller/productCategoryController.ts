@@ -22,8 +22,18 @@ export const updateCategory = async (req: Request, res: Response) => {
       req.body,
       { new: true }
     );
-    return res.status(200).json({ message: "Category", updateCategory });
+    return res.status(200).json({ message: "Category", updatedCategory });
   } catch (error) {
     return res.status(500).json({ message: "someething went wrong" });
+  }
+};
+
+//get all category
+export const getAllCategory = async (req: Request, res: Response) => {
+  try {
+    const allCategory = await ProductCategory.find();
+    return res.status(200).json(allCategory);
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
