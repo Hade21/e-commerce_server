@@ -6,7 +6,7 @@ import config from "./config/config";
 import userRoute from "./routes/userRoutes";
 import productRoute from "./routes/productRoutes";
 import blogRoute from "./routes/blogRoute";
-import categoryRoute from "./routes/categoryRoute";
+import categoryRoute from "./routes/productCategoryRoute";
 import { errorMiddleware, notFound } from "./middleware/errorHandling";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
