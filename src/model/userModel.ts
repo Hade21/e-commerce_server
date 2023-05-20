@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import crypto from "crypto";
 
 const userSchema = new mongoose.Schema(
   {
@@ -56,4 +55,6 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-export const userModel = mongoose.model("user", userSchema);
+const userModel = mongoose.model("users", userSchema);
+
+export default userModel;
