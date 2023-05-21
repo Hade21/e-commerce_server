@@ -6,7 +6,7 @@ import config from "./config/config";
 import userRoute from "./routes/userRoutes";
 import productRoute from "./routes/productRoutes";
 import blogRoute from "./routes/blogRoute";
-import categoryRoute from "./routes/productCategoryRoute";
+import productCategoryRoute from "./routes/productCategoryRoute";
 import { errorMiddleware, notFound } from "./middleware/errorHandling";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -25,7 +25,7 @@ function app() {
   app.use("/api/v1/user", userRoute);
   app.use("/api/v1/product", productRoute);
   app.use("/api/v1/post", blogRoute);
-  app.use("/api/v1/category", categoryRoute);
+  app.use("/api/v1/productCategory", productCategoryRoute);
 
   app.use(notFound);
   app.use(errorMiddleware);
