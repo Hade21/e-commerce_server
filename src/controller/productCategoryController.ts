@@ -12,7 +12,6 @@ export const createCategory = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
-
 //update category
 export const updateCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
