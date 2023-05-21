@@ -19,6 +19,8 @@ export const updateCategory = async (req: Request, res: Response) => {
     const updatedCategory = await BlogCategory.findByIdAndUpdate(id, req.body, {
       new: true,
     });
+    if (!updatedCategory)
+      return res.status(404).json({ message: "Category not found" });
     return res.status(200).json({ message: "Category", updatedCategory });
   } catch (error) {
     return res.status(500).json({ message: "someething went wrong" });
@@ -29,7 +31,24 @@ export const updateCategory = async (req: Request, res: Response) => {
 export const getAllCategory = async (req: Request, res: Response) => {
   try {
     const allCategory = await BlogCategory.find();
-    return res.status(200).json(allCategory);
+    if (!allCategory)
+      return res.status(404).json({ message: "No category found" });
+    return res
+      .status(200)
+      .json({ message: "Categories Found", categories: allCategory });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+//get single category
+export const getSingleCategory = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const category = await BlogCategory.findById(id);
+    if (!category)
+      return res.status(404).json({ message: "Category not found" });
+    return res.status(200).json({ message: "Found", category });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }

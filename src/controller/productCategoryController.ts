@@ -21,6 +21,8 @@ export const updateCategory = async (req: Request, res: Response) => {
       req.body,
       { new: true }
     );
+    if (!updatedCategory)
+      return res.status(404).json({ message: "Category not found" });
     return res.status(200).json({ message: "Category", updatedCategory });
   } catch (error) {
     return res.status(500).json({ message: "someething went wrong" });
