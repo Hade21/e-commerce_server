@@ -12,6 +12,7 @@ export const createCategory = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
 //update category
 export const updateCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -35,7 +36,9 @@ export const getAllCategory = async (req: Request, res: Response) => {
     const allCategory = await ProductCategory.find();
     if (!allCategory)
       return res.status(404).json({ message: "No category found" });
-    return res.status(200).json(allCategory);
+    return res
+      .status(200)
+      .json({ message: "All Category", categories: allCategory });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
