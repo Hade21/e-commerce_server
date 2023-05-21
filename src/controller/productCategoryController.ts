@@ -21,7 +21,9 @@ export const updateCategory = async (req: Request, res: Response) => {
       req.body,
       { new: true }
     );
-    return res.status(200).json({ message: "Category", updatedCategory });
+    return res
+      .status(200)
+      .json({ message: "Category updated", updatedCategory });
   } catch (error) {
     return res.status(500).json({ message: "someething went wrong" });
   }
@@ -31,7 +33,18 @@ export const updateCategory = async (req: Request, res: Response) => {
 export const getAllCategory = async (req: Request, res: Response) => {
   try {
     const allCategory = await ProductCategory.find();
-    return res.status(200).json(allCategory);
+    return res.status(200).json({ message: "All Category", allCategory });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+//delete category
+export const deleteCategory = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    await ProductCategory.findByIdAndDelete(id);
+    return res.status(200).json({ message: "Category deleted" });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }

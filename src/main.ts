@@ -25,7 +25,7 @@ function app() {
   app.use("/api/v1/user", userRoute);
   app.use("/api/v1/product", productRoute);
   app.use("/api/v1/post", blogRoute);
-  app.use("/api/v1/productCategory", productCategoryRoute);
+  app.use("/api/v1/product-category", productCategoryRoute);
 
   app.use(notFound);
   app.use(errorMiddleware);
