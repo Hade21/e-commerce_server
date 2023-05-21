@@ -4,7 +4,7 @@ import {
   getAllCategory,
   updateCategory,
 } from "../controller/productCategoryController";
-import { authMiddleware } from "src/middleware/authMiddleware";
+import { authMiddleware } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
