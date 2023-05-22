@@ -8,6 +8,7 @@ import productRoute from "./routes/productRoutes";
 import blogRoute from "./routes/blogRoute";
 import productCategoryRoute from "./routes/productCategoryRoute";
 import blogCategoryRoute from "./routes/blogCategoryRoutes";
+import brandRoutes from "./routes/brandRoutes";
 import { errorMiddleware, notFound } from "./middleware/errorHandling";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -28,6 +29,7 @@ function app() {
   app.use("/api/v1/post", blogRoute);
   app.use("/api/v1/product-category", productCategoryRoute);
   app.use("/api/v1/blog-category", blogCategoryRoute);
+  app.use("/api/v1/brand", brandRoutes);
 
   app.use(notFound);
   app.use(errorMiddleware);
