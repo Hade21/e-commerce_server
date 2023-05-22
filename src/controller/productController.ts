@@ -1,5 +1,7 @@
 import Product from "../model/productModel";
+import User from "../model/userModel";
 import { Request, Response } from "express";
+import { CustomRequest, Payload } from "global";
 import slugify from "slugify";
 
 //create product
@@ -110,6 +112,40 @@ export const deleteProduct = async (req: Request, res: Response) => {
       .status(200)
       .json({ message: "Product deleted successfully", deletedProduct });
   } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const addToWishlist = async (req: CustomRequest, res: Response) => {
+  const { id: uID } = req.user as Payload;
+  const { id: prodID } = req.body;
+  try {
+    const user = await User.findById(uID);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    const isAdded = user.wishlist.find(
+      (item) => item.toString() === prodID.toString()
+    );
+    if (isAdded) {
+      const removeWishlist = await User.findByIdAndUpdate(
+        uID,
+        { $pull: { wishlist: prodID } },
+        { new: true }
+      );
+      return res
+        .status(200)
+        .json({ message: "Product removed from wishlist", removeWishlist });
+    } else {
+      const addWishlist = await User.findByIdAndUpdate(
+        uID,
+        { $push: { wishlist: prodID } },
+        { new: true }
+      ).populate("wishlist");
+      return res
+        .status(200)
+        .json({ message: "Product added to wishlist", addWishlist });
+    }
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
