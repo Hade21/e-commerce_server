@@ -145,7 +145,39 @@ export const addToWishlist = async (req: CustomRequest, res: Response) => {
         .json({ message: "Product added to wishlist", addWishlist });
     }
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const ratings = async (req: CustomRequest, res: Response) => {
+  const { id: uID } = req.user as Payload;
+  const { star, id: prodID } = req.body;
+  try {
+    const product = await Product.findById(prodID);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    const isRated = product.ratings.find(
+      (item) => item?.postedBy?.toString() === uID.toString()
+    );
+    if (isRated) {
+      const updateRating = await Product.updateOne(
+        {
+          ratings: { $elemMatch: isRated },
+        },
+        { $set: { "ratings.$.star": star } },
+        { new: true }
+      );
+      return res
+        .status(200)
+        .json({ message: "Product rating updated", updateRating });
+    } else {
+      const rateProduct = await Product.findByIdAndUpdate(
+        prodID,
+        { $push: { ratings: { star, postedBy: uID } } },
+        { new: true }
+      );
+      return res.status(200).json({ message: "Product rated", rateProduct });
+    }
+  } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };

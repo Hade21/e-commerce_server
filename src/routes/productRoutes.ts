@@ -6,6 +6,7 @@ import {
   deleteProduct,
   getAllProducts,
   getProductDetail,
+  ratings,
   updateProduct,
 } from "../controller/productController";
 
@@ -15,6 +16,7 @@ router.post("/new", authMiddleware, isSeller, createProduct);
 router.get("/:_id", getProductDetail);
 router.get("/", getAllProducts);
 router.put("/wishlist", authMiddleware, addToWishlist);
+router.put("/rating", authMiddleware, ratings);
 router.put("/:_id", authMiddleware, isSeller, updateProduct);
 router.delete("/:_id", authMiddleware, isSeller, deleteProduct);
 
