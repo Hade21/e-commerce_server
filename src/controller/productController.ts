@@ -145,7 +145,50 @@ export const addToWishlist = async (req: CustomRequest, res: Response) => {
         .json({ message: "Product added to wishlist", addWishlist });
     }
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const ratings = async (req: CustomRequest, res: Response) => {
+  const { id: uID } = req.user as Payload;
+  const { star, comment, id: prodID } = req.body;
+  try {
+    let message = "";
+    const product = await Product.findById(prodID);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    const isRated = product.ratings.find(
+      (item) => item?.postedBy?.toString() === uID.toString()
+    );
+    if (isRated) {
+      await Product.updateOne(
+        {
+          ratings: { $elemMatch: isRated },
+        },
+        { $set: { "ratings.$.star": star, "ratings.$.comment": comment } },
+        { new: true }
+      );
+      message = "Product rating updated";
+    } else {
+      await Product.findByIdAndUpdate(
+        prodID,
+        { $push: { ratings: { star, postedBy: uID, comment } } },
+        { new: true }
+      );
+      message = "Product rated";
+    }
+    const getAllRatings = await Product.findById(prodID).select("ratings");
+    const totalRating = getAllRatings?.ratings.length;
+    let ratingSum = getAllRatings?.ratings
+      .map((item) => item.star)
+      .reduce((prev, curr) => prev! + curr!, 0);
+    let avgRating = Math.round(ratingSum! / totalRating!);
+    const ratedProduct = await Product.findByIdAndUpdate(
+      prodID,
+      { totalRating: avgRating },
+      { new: true }
+    );
+    return res.status(200).json({ message, ratedProduct });
+  } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };

@@ -83,7 +83,7 @@ export const getAllUser = async (req: Request, res: Response) => {
   }
 };
 
-//get User detail
+//get user detail
 export const getUserDetail = async (req: Request, res: Response) => {
   const { _id } = req.params;
   try {
