@@ -151,7 +151,7 @@ export const addToWishlist = async (req: CustomRequest, res: Response) => {
 
 export const ratings = async (req: CustomRequest, res: Response) => {
   const { id: uID } = req.user as Payload;
-  const { star, id: prodID } = req.body;
+  const { star, comment, id: prodID } = req.body;
   try {
     let message = "";
     const product = await Product.findById(prodID);
@@ -164,14 +164,14 @@ export const ratings = async (req: CustomRequest, res: Response) => {
         {
           ratings: { $elemMatch: isRated },
         },
-        { $set: { "ratings.$.star": star } },
+        { $set: { "ratings.$.star": star, "ratings.$.comment": comment } },
         { new: true }
       );
       message = "Product rating updated";
     } else {
       await Product.findByIdAndUpdate(
         prodID,
-        { $push: { ratings: { star, postedBy: uID } } },
+        { $push: { ratings: { star, postedBy: uID, comment } } },
         { new: true }
       );
       message = "Product rated";
