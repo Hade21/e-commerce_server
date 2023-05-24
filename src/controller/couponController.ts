@@ -23,3 +23,13 @@ export const createCoupon = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Something went wrong", error });
   }
 };
+
+//get all coupon
+export const getAllCoupon = async (req: Request, res: Response) => {
+  try {
+    const coupons = await Coupon.find();
+    return res.status(200).json({ message: "Found", coupons });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
