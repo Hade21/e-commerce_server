@@ -11,6 +11,9 @@ interface ENV {
   REFRESH_TOKEN: string | undefined;
   MAIL_ID: string | undefined;
   MAIL_PASSWORD: string | undefined;
+  CLOUD_NAME: string | undefined;
+  API_KEY: string | undefined;
+  API_SECRET: string | undefined;
 }
 
 interface Config {
@@ -21,6 +24,9 @@ interface Config {
   REFRESH_TOKEN: string;
   MAIL_ID: string;
   MAIL_PASSWORD: string;
+  CLOUD_NAME: string;
+  API_KEY: string;
+  API_SECRET: string;
 }
 
 const getConfig = (): ENV => {
@@ -32,6 +38,9 @@ const getConfig = (): ENV => {
     REFRESH_TOKEN: process.env.REFRESH_TOKEN,
     MAIL_ID: process.env.MAIL_ID,
     MAIL_PASSWORD: process.env.MAIL_PASSWORD,
+    CLOUD_NAME: process.env.CLOUD_NAME,
+    API_KEY: process.env.API_KEY,
+    API_SECRET: process.env.API_SECRET,
   };
 };
 
