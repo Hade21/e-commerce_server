@@ -2,6 +2,8 @@ import { CustomRequest, Payload } from "global";
 import Blog from "../model/blogModel";
 import User from "../model/userModel";
 import { Request, Response } from "express";
+import { cloudinaryUploadImage } from "../utils/cloudinary";
+import fs from "fs";
 
 //create post
 export const createBlog = async (req: Request, res: Response) => {
@@ -146,5 +148,28 @@ export const dislikeBlog = async (req: CustomRequest, res: Response) => {
       { new: true }
     );
     return res.status(200).json({ blog });
+  }
+};
+
+//upload images
+export const uploadBlogImages = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const files = req.files as Express.Multer.File[];
+    const uploader = (path: any) => cloudinaryUploadImage(path);
+    const { path } = files[0];
+    const newPath = await uploader(path);
+    fs.unlinkSync(path);
+    const blog = await Blog.findByIdAndUpdate(
+      id,
+      {
+        images: newPath,
+      },
+      { new: true }
+    );
+    return res.status(200).json({ message: "images uploaded", blog });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
