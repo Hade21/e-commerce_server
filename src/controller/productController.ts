@@ -192,3 +192,7 @@ export const ratings = async (req: CustomRequest, res: Response) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+export const uploadImages = async (req: Request, res: Response) => {
+  console.log(req.files);
+};

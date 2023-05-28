@@ -36,13 +36,13 @@ const multerFilter = (
   }
 };
 
-const uploadPhoto = multer({
+export const uploadPhoto = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
   limits: { fileSize: 2000000 },
 });
 
-const productImgResize = async (
+export const productImgResize = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -55,12 +55,14 @@ const productImgResize = async (
         .resize(300, 300)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`public/images/products/${file.filename}`);
+        .toFile(
+          path.join(__dirname, `../public/images/products/${file.filename}`)
+        );
     })
   );
   next();
 };
-const blogImgResize = async (
+export const blogImgResize = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -73,10 +75,8 @@ const blogImgResize = async (
         .resize(300, 300)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`public/images/products/${file.filename}`);
+        .toFile(`public/images/blogs/${file.filename}`);
     })
   );
   next();
 };
-
-module.exports = { uploadPhoto, productImgResize, blogImgResize };
