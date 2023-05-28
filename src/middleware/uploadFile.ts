@@ -2,6 +2,7 @@ import sharp from "sharp";
 import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import { NextFunction, Request, Response } from "express";
+import fs from "fs";
 
 type DestinationCallback = (error: Error | null, destination: string) => void;
 type FilenameCallback = (error: Error | null, filename: string) => void;
@@ -58,6 +59,7 @@ export const productImgResize = async (
         .toFile(
           path.join(__dirname, `../public/images/products/${file.filename}`)
         );
+      fs.unlinkSync(__dirname + `/../public/images/products/${file.filename}`);
     })
   );
   next();
@@ -78,6 +80,7 @@ export const blogImgResize = async (
         .toFile(
           path.join(__dirname, `../public/images/blogs/${file.filename}`)
         );
+      fs.unlinkSync(__dirname + `/../public/images/blogs/${file.filename}`);
     })
   );
   next();

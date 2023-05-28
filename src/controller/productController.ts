@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import { CustomRequest, Payload } from "global";
 import slugify from "slugify";
 import { cloudinaryUploadImage } from "../utils/cloudinary";
-import path from "path";
+import fs from "fs";
 
 //create product
 export const createProduct = async (req: Request, res: Response) => {
@@ -205,6 +205,7 @@ export const uploadImages = async (req: Request, res: Response) => {
       const { path } = file;
       const newPath = await uploader(path);
       urls.push(newPath);
+      fs.unlinkSync(path);
     }
     const product = await Product.findByIdAndUpdate(
       id,
