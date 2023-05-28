@@ -3,6 +3,8 @@ import User from "../model/userModel";
 import { Request, Response } from "express";
 import { CustomRequest, Payload } from "global";
 import slugify from "slugify";
+import { cloudinaryUploadImage } from "../utils/cloudinary";
+import fs from "fs";
 
 //create product
 export const createProduct = async (req: Request, res: Response) => {
@@ -189,6 +191,34 @@ export const ratings = async (req: CustomRequest, res: Response) => {
     );
     return res.status(200).json({ message, ratedProduct });
   } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const uploadImages = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const uploader = (path: any) => cloudinaryUploadImage(path);
+    const urls = [];
+    const files = req.files as Express.Multer.File[];
+    for (const file of files) {
+      const { path } = file;
+      const newPath = await uploader(path);
+      urls.push(newPath);
+      fs.unlinkSync(path);
+    }
+    const product = await Product.findByIdAndUpdate(
+      id,
+      {
+        images: urls.map((item) => {
+          return { url: item };
+        }),
+      },
+      { new: true }
+    );
+    return res.status(200).json({ message: "Images uploaded", product });
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };

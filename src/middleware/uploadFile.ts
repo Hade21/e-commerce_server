@@ -2,6 +2,7 @@ import sharp from "sharp";
 import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import { NextFunction, Request, Response } from "express";
+import fs from "fs";
 
 type DestinationCallback = (error: Error | null, destination: string) => void;
 type FilenameCallback = (error: Error | null, filename: string) => void;
@@ -36,13 +37,13 @@ const multerFilter = (
   }
 };
 
-const uploadPhoto = multer({
+export const uploadPhoto = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
   limits: { fileSize: 2000000 },
 });
 
-const productImgResize = async (
+export const productImgResize = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -55,12 +56,15 @@ const productImgResize = async (
         .resize(300, 300)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`public/images/products/${file.filename}`);
+        .toFile(
+          path.join(__dirname, `../public/images/products/${file.filename}`)
+        );
+      fs.unlinkSync(__dirname + `/../public/images/products/${file.filename}`);
     })
   );
   next();
 };
-const blogImgResize = async (
+export const blogImgResize = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -73,10 +77,11 @@ const blogImgResize = async (
         .resize(300, 300)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`public/images/products/${file.filename}`);
+        .toFile(
+          path.join(__dirname, `../public/images/blogs/${file.filename}`)
+        );
+      fs.unlinkSync(__dirname + `/../public/images/blogs/${file.filename}`);
     })
   );
   next();
 };
-
-module.exports = { uploadPhoto, productImgResize, blogImgResize };
