@@ -75,7 +75,9 @@ export const blogImgResize = async (
         .resize(300, 300)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`public/images/blogs/${file.filename}`);
+        .toFile(
+          path.join(__dirname, `../public/images/blogs/${file.filename}`)
+        );
     })
   );
   next();
