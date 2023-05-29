@@ -273,3 +273,13 @@ export const resetPassword = async (req: Request, res: Response) => {
   await user.save();
   res.status(200).json({ message: "Password updated succesfully" });
 };
+
+export const getWishlist = async (req: CustomRequest, res: Response) => {
+  const { id } = req.user as Payload;
+  try {
+    const user = await User.findById(id).populate("wishlist");
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
