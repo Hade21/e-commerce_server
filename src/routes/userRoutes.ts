@@ -7,6 +7,7 @@ import {
   forgotPasswordToken,
   getAllUser,
   getUserDetail,
+  getWishlist,
   handleRefreshToken,
   loginUser,
   logout,
@@ -26,6 +27,7 @@ router.get("/all-user", authMiddleware, isAdmin, getAllUser);
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logout);
 router.get("/:_id", authMiddleware, getUserDetail);
+router.get("/wishlist/:id", authMiddleware, getWishlist);
 router.put("/updatePassword", authMiddleware, updatePassword);
 router.put("/:_id", authMiddleware, updateUser);
 router.put("/block-user/:_id", authMiddleware, isAdmin, blockUser);
