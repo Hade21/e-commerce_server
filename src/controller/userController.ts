@@ -32,7 +32,7 @@ export const createUser = async (req: Request, res: Response) => {
     } else {
       return res
         .status(422)
-        .json({ message: "Phone number has taken, please siign in" });
+        .json({ message: "Phone number has taken, please sign in" });
     }
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong", error });
