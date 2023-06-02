@@ -42,3 +42,30 @@ export const updateAddress = async (req: CustomRequest, res: Response) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+//delete address
+export const deleteAddress = async (req: CustomRequest, res: Response) => {
+  const { id: uID } = req.user as Payload;
+  const { id: aID } = req.params;
+  try {
+    const owner = await User.findById(uID);
+    if (!owner) return res.status(404).json({ message: "User not found!" });
+    const exist = owner.address.find(
+      (item) => item._id.toString() === aID.toString()
+    );
+    if (exist) {
+      const deleteAddress = await Address.findByIdAndDelete(aID);
+      const updateUser = await User.findByIdAndUpdate(
+        uID,
+        { $pull: { address: aID } },
+        { new: true }
+      ).populate("address");
+      return res
+        .status(200)
+        .json({ message: "Address deleted succesfully", updateUser });
+    }
+    return res.status(404).json({ message: "Address not found" });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
