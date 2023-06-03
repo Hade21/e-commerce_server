@@ -15,6 +15,7 @@ export const saveAddress = async (req: CustomRequest, res: Response) => {
     ).populate("address");
     return res.status(201).json({ message: "Address saved", updateAddress });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
