@@ -290,7 +290,7 @@ export const getWishlist = async (req: CustomRequest, res: Response) => {
 };
 
 //add to cart
-export const userCart = async (req: CustomRequest, res: Response) => {
+export const addCart = async (req: CustomRequest, res: Response) => {
   const { cart } = req.body;
   const { id } = req.user as Payload;
   try {
