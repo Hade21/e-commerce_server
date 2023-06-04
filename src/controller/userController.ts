@@ -375,3 +375,14 @@ export const userCart = async (req: CustomRequest, res: Response) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+//get user cart
+export const getCartUser = async (req: CustomRequest, res: Response) => {
+  const { id } = req.user as Payload;
+  try {
+    const cart = await Cart.findOne({ orderBy: id });
+    return res.status(200).json(cart);
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
