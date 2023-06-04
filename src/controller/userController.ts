@@ -1,11 +1,14 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import User from "../model/userModel";
+import Cart from "../model/cartModel";
+import Product from "../model/productModel";
 import { generateToken, generateRefereshToken } from "../config/jwtToken";
 import { verifyRefreshToken } from "../middleware/authMiddleware";
-import { CustomRequest, Payload } from "global";
+import { CustomRequest, ObjectCartProduct, Payload } from "global";
 import { sendEmail } from "./emailController";
 import crypto from "crypto";
+import { getCartTotal } from "../utils/productUtils";
 
 //register User
 export const createUser = async (req: Request, res: Response) => {
@@ -255,6 +258,7 @@ export const forgotPasswordToken = async (req: Request, res: Response) => {
   }
 };
 
+//reset pasword
 export const resetPassword = async (req: Request, res: Response) => {
   const { newPassword, confirmPassword } = req.body;
   const token: string = req.params.token;
@@ -274,11 +278,99 @@ export const resetPassword = async (req: Request, res: Response) => {
   res.status(200).json({ message: "Password updated succesfully" });
 };
 
+//wishlist
 export const getWishlist = async (req: CustomRequest, res: Response) => {
   const { id } = req.user as Payload;
   try {
     const user = await User.findById(id).populate("wishlist");
     return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+//add to cart
+export const userCart = async (req: CustomRequest, res: Response) => {
+  const { cart } = req.body;
+  const { id } = req.user as Payload;
+  try {
+    const user = await User.findById(id);
+    const exist = await Cart.findOne({ orderBy: user?.id });
+    const productExist = exist?.products.find(
+      (item) => item.product?.toString() === cart._id.toString()
+    );
+    if (exist && productExist) {
+      const product = await Cart.updateOne(
+        {
+          products: { $elemMatch: productExist },
+        },
+        {
+          $set: {
+            "products.$.count": productExist.count + cart.count,
+            cartTotal: getCartTotal(exist.products as ObjectCartProduct[]),
+          },
+        },
+        { new: true }
+      );
+      return res
+        .status(200)
+        .json({ message: "Product added to cart", product });
+    } else if (exist && !productExist) {
+      let products = [];
+      for (let i = 0; i < cart.length; i++) {
+        let object: ObjectCartProduct = {
+          product: undefined,
+          count: 0,
+          variant: "",
+          price: 0,
+        };
+        object.product = cart[i]._id;
+        object.count = cart[i].count as Number;
+        object.variant = cart[i].variant;
+        let getPrice = await Product.findById(cart[i]._id)
+          .select("price")
+          .exec();
+        object.price = getPrice?.price as Number;
+        products.push(object);
+      }
+      const product = await Cart.findByIdAndUpdate(
+        exist._id,
+        {
+          $push: { products: products },
+          $set: {
+            cartTotal: getCartTotal(exist.products as ObjectCartProduct[]),
+          },
+        },
+        { new: true }
+      );
+      return res
+        .status(200)
+        .json({ message: "Product added to cart", product });
+    } else {
+      let products = [];
+      for (let i = 0; i < cart.length; i++) {
+        let object: ObjectCartProduct = {
+          product: undefined,
+          count: 0,
+          variant: "",
+          price: 0,
+        };
+        object.product = cart[i]._id;
+        object.count = cart[i].count as Number;
+        object.variant = cart[i].variant;
+        let getPrice = await Product.findById(cart[i]._id)
+          .select("price")
+          .exec();
+        object.price = getPrice?.price as Number;
+        products.push(object);
+      }
+      const newCart = await new Cart({
+        products,
+        cartTotal: getCartTotal(products),
+        orderBy: user?._id,
+      }).save();
+      return res.status(201).json({ message: "New Cart added", newCart });
+    }
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
