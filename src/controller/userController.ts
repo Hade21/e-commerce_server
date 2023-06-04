@@ -380,8 +380,28 @@ export const userCart = async (req: CustomRequest, res: Response) => {
 export const getCartUser = async (req: CustomRequest, res: Response) => {
   const { id } = req.user as Payload;
   try {
-    const cart = await Cart.findOne({ orderBy: id });
+    const cart = await Cart.findOne({ orderBy: id }).populate(
+      "products.product"
+    );
     return res.status(200).json(cart);
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+//empty cart
+export const emptyCart = async (req: CustomRequest, res: Response) => {
+  const { id } = req.user as Payload;
+  try {
+    const user = await User.findById(id);
+    const cart = await Cart.findOne({ orderBy: id });
+    if (user?._id === cart?.orderBy) {
+      await Cart.findByIdAndRemove(cart?._id);
+      return res.status(200).json({ message: "Cart deleted" });
+    }
+    return res
+      .status(404)
+      .json({ message: "Cart not found or unathourized user" });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
