@@ -1,14 +1,15 @@
-import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import User from "../model/userModel";
 import Cart from "../model/cartModel";
 import Product from "../model/productModel";
+import Coupon from "../model/couponModel";
+import { Request, Response } from "express";
 import { generateToken, generateRefereshToken } from "../config/jwtToken";
 import { verifyRefreshToken } from "../middleware/authMiddleware";
 import { CustomRequest, ObjectCartProduct, Payload } from "global";
 import { sendEmail } from "./emailController";
-import crypto from "crypto";
 import { getCartTotal } from "../utils/productUtils";
+import crypto from "crypto";
 
 //register User
 export const createUser = async (req: Request, res: Response) => {
@@ -435,6 +436,38 @@ export const decreaseItem = async (req: CustomRequest, res: Response) => {
     return res
       .status(200)
       .json({ message: "Product item updated", decreaseItem });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+//apply coupon
+export const applyCoupon = async (req: CustomRequest, res: Response) => {
+  const { coupon } = req.body;
+  const { id } = req.user as Payload;
+  try {
+    const validCoupon = await Coupon.findOne({ code: coupon });
+    if (!validCoupon)
+      return res
+        .status(404)
+        .json({ message: "Coupon not found or invalid code" });
+    if (!validCoupon.isActive)
+      return res.status(203).json({ message: "Coupon is expired" });
+    const user = await User.findById(id);
+    const cart = await Cart.findOne({ orderBy: user?._id }).populate(
+      "products.product"
+    );
+    let cartTotal = cart?.cartTotal;
+    let totalAfterDiscount =
+      cartTotal! - cartTotal! * (validCoupon.discount / 100);
+    await Cart.findOneAndUpdate(
+      { orderBy: user?._id },
+      { $set: { totalAfterDiscount } },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "Coupon applied", totalAfterDiscount });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
