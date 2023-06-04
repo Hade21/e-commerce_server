@@ -2,6 +2,7 @@ import express from "express";
 import { authMiddleware, isAdmin } from "../middleware/authMiddleware";
 import {
   addCart,
+  applyCoupon,
   blockUser,
   createUser,
   decreaseItem,
@@ -34,6 +35,7 @@ router.post("/forgot-password-token", forgotPasswordToken);
 router.post("/reset-password/:token", resetPassword);
 router.post("/address", authMiddleware, saveAddress);
 router.post("/cart", authMiddleware, addCart);
+router.post("/apply-coupon", authMiddleware, applyCoupon);
 router.get("/all-user", authMiddleware, isAdmin, getAllUser);
 router.get("/refresh", handleRefreshToken);
 router.get("/logout", logout);
