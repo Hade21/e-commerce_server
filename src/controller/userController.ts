@@ -406,3 +406,36 @@ export const emptyCart = async (req: CustomRequest, res: Response) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+//decrease item in cart
+export const decreaseItem = async (req: CustomRequest, res: Response) => {
+  const { id } = req.user as Payload;
+  const { cart } = req.body;
+  try {
+    const productCart = await Cart.findOne({ orderBy: id });
+    const productExist = productCart?.products.find(
+      (item) => item.product?.toString() === cart.product.toString()
+    );
+    if (!productCart)
+      return res.status(404).json({ message: "Cart not found" });
+    if (!productExist)
+      return res.status(404).json({ message: "Product not found" });
+    const decreaseItem = await Cart.updateOne(
+      {
+        products: { $elemMatch: productExist },
+      },
+      {
+        $set: {
+          "products.$.count": cart.count,
+          cartTotal: getCartTotal(productCart.products as ObjectCartProduct[]),
+        },
+      },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "Product item updated", decreaseItem });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
