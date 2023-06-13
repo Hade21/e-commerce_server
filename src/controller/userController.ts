@@ -3,6 +3,7 @@ import User from "../model/userModel";
 import Cart from "../model/cartModel";
 import Product from "../model/productModel";
 import Coupon from "../model/couponModel";
+import Order from "../model/orderModel"
 import { Request, Response } from "express";
 import { generateToken, generateRefereshToken } from "../config/jwtToken";
 import { verifyRefreshToken } from "../middleware/authMiddleware";
@@ -10,6 +11,7 @@ import { CustomRequest, ObjectCartProduct, Payload } from "global";
 import { sendEmail } from "./emailController";
 import { getCartTotal } from "../utils/productUtils";
 import crypto from "crypto";
+import uniqid from "uniqid"
 
 //register User
 export const createUser = async (req: Request, res: Response) => {
@@ -301,78 +303,80 @@ export const addCart = async (req: CustomRequest, res: Response) => {
       (item) => item.product?.toString() === cart._id.toString()
     );
     if (exist && productExist) {
-      const product = await Cart.updateOne(
+      await Cart.updateOne(
         {
           products: { $elemMatch: productExist },
         },
         {
-          $set: {
-            "products.$.count": productExist.count + cart.count,
-            cartTotal: getCartTotal(exist.products as ObjectCartProduct[]),
-          },
+          $set: { "products.$.count": cart.count + productExist.count }
         },
         { new: true }
       );
+      const updated = await Cart.findOne({ orderBy: user?._id })
+      const product = await Cart.findByIdAndUpdate(updated?._id,
+        {
+          $set: {
+            cartTotal: getCartTotal(updated?.products as ObjectCartProduct[]),
+          },
+        },
+        {
+          new: true
+        }
+      )
       return res
         .status(200)
-        .json({ message: "Product added to cart", product });
+        .json({ message: "Product added to cart", cart: product });
     } else if (exist && !productExist) {
-      let products = [];
-      for (let i = 0; i < cart.length; i++) {
-        let object: ObjectCartProduct = {
-          product: undefined,
-          count: 0,
-          variant: "",
-          price: 0,
-        };
-        object.product = cart[i]._id;
-        object.count = cart[i].count as Number;
-        object.variant = cart[i].variant;
-        let getPrice = await Product.findById(cart[i]._id)
-          .select("price")
-          .exec();
-        object.price = getPrice?.price as Number;
-        products.push(object);
-      }
-      const product = await Cart.findByIdAndUpdate(
+
+      let products: ObjectCartProduct = {
+        product: undefined,
+        count: 0,
+        variant: "",
+        price: 0,
+      };
+      products.product = cart._id;
+      products.count = cart.count as Number;
+      products.variant = cart.variant;
+      let getPrice = await Product.findById(cart._id)
+        .select("price")
+        .exec();
+      products.price = getPrice?.price as Number;
+      const addCount = await Cart.findByIdAndUpdate(
         exist._id,
         {
           $push: { products: products },
-          $set: {
-            cartTotal: getCartTotal(exist.products as ObjectCartProduct[]),
-          },
         },
         { new: true }
       );
+      console.log(addCount)
+      const product = await Cart.findByIdAndUpdate(
+        exist._id,
+        {
+          $set: {
+            cartTotal: getCartTotal(addCount?.products as ObjectCartProduct[]),
+          },
+        }, { new: true }
+      )
       return res
         .status(200)
-        .json({ message: "Product added to cart", product });
+        .json({ message: "Product added to cart", cart: product });
     } else {
-      let products = [];
-      for (let i = 0; i < cart.length; i++) {
-        let object: ObjectCartProduct = {
-          product: undefined,
-          count: 0,
-          variant: "",
-          price: 0,
-        };
-        object.product = cart[i]._id;
-        object.count = cart[i].count as Number;
-        object.variant = cart[i].variant;
-        let getPrice = await Product.findById(cart[i]._id)
-          .select("price")
-          .exec();
-        object.price = getPrice?.price as Number;
-        products.push(object);
-      }
+      const price = await Product.findById(cart._id).select("price").exec()
+      const products: ObjectCartProduct[] = [{
+        product: cart._id,
+        count: cart.count,
+        variant: cart.variant,
+        price: price!.price
+      }]
       const newCart = await new Cart({
         products,
         cartTotal: getCartTotal(products),
         orderBy: user?._id,
       }).save();
-      return res.status(201).json({ message: "New Cart added", newCart });
+      return res.status(201).json({ message: "New Cart added", cart: newCart });
     }
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
@@ -384,8 +388,10 @@ export const getCartUser = async (req: CustomRequest, res: Response) => {
     const cart = await Cart.findOne({ orderBy: id }).populate(
       "products.product"
     );
+    if (!cart) return res.status(404).json({ message: "Cart not found" })
     return res.status(200).json(cart);
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
@@ -396,7 +402,7 @@ export const emptyCart = async (req: CustomRequest, res: Response) => {
   try {
     const user = await User.findById(id);
     const cart = await Cart.findOne({ orderBy: id });
-    if (user?._id === cart?.orderBy) {
+    if (user?._id.toString() === cart?.orderBy?.toString()) {
       await Cart.findByIdAndRemove(cart?._id);
       return res.status(200).json({ message: "Cart deleted" });
     }
@@ -404,6 +410,7 @@ export const emptyCart = async (req: CustomRequest, res: Response) => {
       .status(404)
       .json({ message: "Cart not found or unathourized user" });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
@@ -472,3 +479,44 @@ export const applyCoupon = async (req: CustomRequest, res: Response) => {
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+//create order
+export const createOrder = async (req: CustomRequest, res: Response) => {
+  const { id } = req.user as Payload
+  const { COD, aplliedCoupon } = req.body
+  try {
+    if (!COD) return res.status(203).json({ message: "Order failed!" })
+    const user = await User.findById(id)
+    const userCart = await Cart.findOne({ orderBy: user?._id })
+    let finalAmount = 0
+    if (aplliedCoupon && userCart?.totalAfterDiscount) {
+      finalAmount = userCart.totalAfterDiscount * 100
+    } else {
+      finalAmount = userCart?.cartTotal! * 100
+    }
+    let newOrder = await new Order({
+      products: userCart?.products,
+      paymentIntent: {
+        id: uniqid(),
+        method: "COD",
+        amount: finalAmount,
+        status: "Cash on Delivery",
+        created: Date.now(),
+        currency: "usd"
+      },
+      orderBy: user?._id,
+      orderStatus: "Cash on Delivery"
+    }).save()
+    let update = userCart?.products.map(item => {
+      return {
+        updateOne: {
+          filter: { _id: item.product?._id },
+          update: { $inc: { stocks: -item?.count!, itemSold: +item?.count! } }
+        }
+      }
+    })
+    // const updated = await Product.bulkWrite(update, {})
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" })
+  }
+}
