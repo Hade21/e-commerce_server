@@ -348,7 +348,6 @@ export const addCart = async (req: CustomRequest, res: Response) => {
         },
         { new: true }
       );
-      console.log(addCount)
       const product = await Cart.findByIdAndUpdate(
         exist._id,
         {
@@ -428,22 +427,30 @@ export const decreaseItem = async (req: CustomRequest, res: Response) => {
       return res.status(404).json({ message: "Cart not found" });
     if (!productExist)
       return res.status(404).json({ message: "Product not found" });
-    const decreaseItem = await Cart.updateOne(
+    await Cart.updateOne(
       {
         products: { $elemMatch: productExist },
       },
       {
         $set: {
           "products.$.count": cart.count,
-          cartTotal: getCartTotal(productCart.products as ObjectCartProduct[]),
         },
       },
       { new: true }
     );
+    const updated = await Cart.findById(productCart._id)
+    const decreaseItem = await Cart.findByIdAndUpdate(
+      productCart._id,
+      {
+        $set: { cartTotal: getCartTotal(updated?.products as ObjectCartProduct[]) },
+      },
+      { new: true }
+    )
     return res
       .status(200)
       .json({ message: "Product item updated", decreaseItem });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
