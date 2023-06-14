@@ -490,16 +490,16 @@ export const applyCoupon = async (req: CustomRequest, res: Response) => {
 //create order
 export const createOrder = async (req: CustomRequest, res: Response) => {
   const { id } = req.user as Payload
-  const { COD, aplliedCoupon } = req.body
+  const { COD, appliedCoupon } = req.body
   try {
     if (!COD) return res.status(203).json({ message: "Order failed!" })
     const user = await User.findById(id)
     const userCart = await Cart.findOne({ orderBy: user?._id })
     let finalAmount = 0
-    if (aplliedCoupon && userCart?.totalAfterDiscount) {
-      finalAmount = userCart.totalAfterDiscount * 100
+    if (appliedCoupon && userCart?.totalAfterDiscount) {
+      finalAmount = userCart.totalAfterDiscount
     } else {
-      finalAmount = userCart?.cartTotal! * 100
+      finalAmount = userCart?.cartTotal as number
     }
     let newOrder = await new Order({
       products: userCart?.products,
@@ -514,7 +514,7 @@ export const createOrder = async (req: CustomRequest, res: Response) => {
       orderBy: user?._id,
       orderStatus: "Cash on Delivery"
     }).save()
-    let update = userCart?.products.map(item => {
+    let updates = userCart?.products.map(item => {
       return {
         updateOne: {
           filter: { _id: item.product?._id },
@@ -522,7 +522,47 @@ export const createOrder = async (req: CustomRequest, res: Response) => {
         }
       }
     })
-    // const updated = await Product.bulkWrite(update, {})
+    const updated = await Product.bulkWrite(updates as any, {})
+    if (updated) {
+      await Cart.findByIdAndDelete(userCart?._id)
+    }
+    return res.status(201).json({ message: "Order created", newOrder })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: "Something went wrong" })
+  }
+}
+
+//get orders
+export const getOrders = async (req: CustomRequest, res: Response) => {
+  const { id } = req.user as Payload
+  try {
+    const orders = await Order.find({ orderBy: id })
+    return res.status(200).json({ orders })
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" })
+  }
+}
+
+//update order status
+export const updateOrderStatus = async (req: CustomRequest, res: Response) => {
+  const { status } = req.body
+  const { id } = req.params
+  try {
+    const order = await Order.findByIdAndUpdate(
+      id,
+      {
+        orderStatus: status,
+        paymentIntent: {
+          status: status
+        }
+      },
+      {
+        new: true
+      }
+    )
+    if (!order) return res.status(404).json({ message: "Order not found" })
+    return res.status(200).json({ message: "Order status updated", order })
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" })
   }
