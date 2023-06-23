@@ -1,0 +1,14 @@
+version: "4.12"
+
+services:
+  app:
+    container_name: tokoku-server
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    stdin_open: true
+    env_file:
+      - /src/config/config.env
