@@ -5,11 +5,12 @@ WORKDIR /user/src/app
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY global.d.ts ./
+COPY ./src .
 
-RUN ls -a
 RUN npm install
 RUN npm run build
 RUN npm install -g pm2
+RUN ls -a
 
 COPY . .
 
