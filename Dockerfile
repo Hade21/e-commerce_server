@@ -3,13 +3,14 @@ FROM node:20
 WORKDIR /user/src/app
 
 COPY package*.json ./
+COPY tsconfig.json ./
+COPY global.d.ts ./
 
 RUN ls -a
 RUN npm install
-RUN npm run build
 
 COPY . .
 
-EXPOSE 8080
+EXPOSE 80
 
-CMD ["npm", "start"]
+CMD [ "npm", "run", "start" ]
