@@ -5,7 +5,7 @@ WORKDIR /user/src/app
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY global.d.ts ./
-COPY ./src .
+COPY ./src ./src
 
 RUN npm install
 RUN npm run build
