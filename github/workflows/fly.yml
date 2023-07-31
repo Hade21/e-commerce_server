@@ -1,0 +1,16 @@
+name: Fly Deploy
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    name: Tokoku server
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: action/chcekout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
