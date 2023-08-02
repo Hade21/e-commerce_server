@@ -15,8 +15,7 @@ import uniqid from "uniqid"
 
 //register User
 export const createUser = async (req: Request, res: Response) => {
-  const { firstName, lastName, phone, email } = req.body;
-  const password = await bcrypt.hash(req.body.password, 12);
+  const { firstName, lastName, phone, email, password } = req.body;
   const emailExist = await User.findOne({ email });
   const phoneExist = await User.findOne({ phone });
   try {
@@ -57,7 +56,7 @@ export const loginUser = async (req: Request, res: Response) => {
       if (match) {
         const token = generateToken(findUser._id.toString());
         const refreshToken = generateRefereshToken(findUser._id.toString());
-        const updateUser = await User.findByIdAndUpdate(
+        await User.findByIdAndUpdate(
           findUser._id,
           { refreshToken: refreshToken },
           { new: true }
