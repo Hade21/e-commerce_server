@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: action/chcekout@v3
+      - uses: action/checkout@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only
         env:
