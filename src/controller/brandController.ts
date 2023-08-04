@@ -7,7 +7,10 @@ export const createBrand = async (req: Request, res: Response) => {
     const newBrand = await Brand.create(req.body);
     return res.status(201).json({ message: "New Brand created", newBrand });
   } catch (error) {
-    return res.status(500).json({ message: "Something went wrong" });
+    if (error instanceof Error) {
+      if (error.message.includes("E11000")) return res.status(409).json({ message: "Brand already exist" })
+      return res.status(500).json({ message: "Something went wrong", error });
+    }
   }
 };
 //update brand

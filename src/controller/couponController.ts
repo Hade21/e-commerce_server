@@ -20,7 +20,9 @@ export const createCoupon = async (req: Request, res: Response) => {
       .status(201)
       .json({ message: "Coupon created successfully", newCoupon });
   } catch (error) {
-    return res.status(500).json({ message: "Something went wrong", error });
+    if (error instanceof Error) {
+      return res.status(500).json({ message: "Something went wrong", error });
+    }
   }
 };
 

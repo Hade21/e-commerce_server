@@ -1,6 +1,5 @@
 import { CustomRequest, Payload } from "global";
 import Blog from "../model/blogModel";
-import User from "../model/userModel";
 import { Request, Response } from "express";
 import { cloudinaryUploadImage } from "../utils/cloudinary";
 import fs from "fs";
@@ -58,6 +57,8 @@ export const getBlogById = async (req: Request, res: Response) => {
 export const deleteBlog = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
+    const blog = await Blog.findById(id)
+    if (!blog) return res.status(404).json({ message: "Article not found" })
     await Blog.findByIdAndDelete(id);
     return res.status(200).json({ message: "Article deleted" });
   } catch (error) {
@@ -68,6 +69,9 @@ export const deleteBlog = async (req: Request, res: Response) => {
 export const likeBlog = async (req: CustomRequest, res: Response) => {
   const { id: blogId } = req.params;
   const blog = await Blog.findById(blogId);
+
+  if (!blog) return res.status(404).json({ message: "Article not found" })
+
   const { id: loginUserId } = req.user as Payload;
   const isLiked = blog?.isLiked;
 

@@ -460,6 +460,7 @@ export const applyCoupon = async (req: CustomRequest, res: Response) => {
   const { id } = req.user as Payload;
   try {
     const validCoupon = await Coupon.findOne({ code: coupon });
+
     if (!validCoupon)
       return res
         .status(404)
@@ -470,7 +471,9 @@ export const applyCoupon = async (req: CustomRequest, res: Response) => {
     const cart = await Cart.findOne({ orderBy: user?._id }).populate(
       "products.product"
     );
-    let cartTotal = cart?.cartTotal;
+    if (!cart) return res.status(404).json({ message: "Cart not found" })
+
+    let cartTotal = cart.cartTotal;
     let totalAfterDiscount =
       cartTotal! - cartTotal! * (validCoupon.discount / 100);
     await Cart.findOneAndUpdate(
@@ -494,6 +497,7 @@ export const createOrder = async (req: CustomRequest, res: Response) => {
     if (!COD) return res.status(203).json({ message: "Order failed!" })
     const user = await User.findById(id)
     const userCart = await Cart.findOne({ orderBy: user?._id })
+    if (!userCart) return res.status(404).json({ message: "Cart not found" })
     let finalAmount = 0
     if (appliedCoupon && userCart?.totalAfterDiscount) {
       finalAmount = userCart.totalAfterDiscount

@@ -9,7 +9,10 @@ export const createCategory = async (req: Request, res: Response) => {
       .status(201)
       .json({ message: "New Category created", newCategory });
   } catch (error) {
-    return res.status(500).json({ message: "Something went wrong" });
+    if (error instanceof Error) {
+      if (error.message.includes("E11000")) return res.status(409).json({ message: "Brand already exist" })
+      return res.status(500).json({ message: "Something went wrong" });
+    }
   }
 };
 //update category
@@ -57,6 +60,8 @@ export const getSingleCategory = async (req: Request, res: Response) => {
 //delete category
 export const deleteCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const category = await BlogCategory.findById(id);
+  if (!category) return res.status(404).json({ message: "Category not found" });
   try {
     await BlogCategory.findByIdAndDelete(id);
     return res.status(200).json({ message: "Category deleted" });

@@ -123,7 +123,9 @@ export const addToWishlist = async (req: CustomRequest, res: Response) => {
   const { id: prodID } = req.body;
   try {
     const user = await User.findById(uID);
+    const product = await Product.findById(prodID);
     if (!user) return res.status(404).json({ message: "User not found" });
+    if (!product) return res.status(404).json({ message: "Product not found" })
     const isAdded = user.wishlist.find(
       (item) => item.toString() === prodID.toString()
     );
