@@ -8,7 +8,7 @@ export const generateToken = (id: string) => {
   });
 };
 
-export const generateRefereshToken = (id: string) => {
+export const generateRefreshToken = (id: string) => {
   return jwt.sign({ id }, config.REFRESH_TOKEN, {
     expiresIn: "1d",
     algorithm: "HS256",

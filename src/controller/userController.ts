@@ -5,7 +5,7 @@ import Product from "../model/productModel";
 import Coupon from "../model/couponModel";
 import Order from "../model/orderModel"
 import { Request, Response } from "express";
-import { generateToken, generateRefereshToken } from "../config/jwtToken";
+import { generateToken, generateRefreshToken } from "../config/jwtToken";
 import { verifyRefreshToken } from "../middleware/authMiddleware";
 import { CustomRequest, ObjectCartProduct, Payload } from "global";
 import { sendEmail } from "./emailController";
@@ -55,19 +55,15 @@ export const loginUser = async (req: Request, res: Response) => {
       const match = await bcrypt.compare(password, findUser.password);
       if (match) {
         const token = generateToken(findUser._id.toString());
-        const refreshToken = generateRefereshToken(findUser._id.toString());
+        const refreshToken = generateRefreshToken(findUser._id.toString());
         await User.findByIdAndUpdate(
           findUser._id,
           { refreshToken: refreshToken },
           { new: true }
         );
-        res.cookie("refreshToken", refreshToken, {
-          httpOnly: true,
-          maxAge: 24 * 60 * 60 * 1000,
-        });
         return res
           .status(200)
-          .json({ message: "User logged in successfully", token });
+          .json({ message: "User logged in successfully", token, refreshToken, maxAge: 24 * 60 * 60 * 1000, });
       } else {
         return res.status(401).json({ message: "Incorrect password" });
       }
