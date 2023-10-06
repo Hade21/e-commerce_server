@@ -122,7 +122,7 @@ export const updateUser = async (req: Request, res: Response) => {
         new: true,
       }
     );
-    return res.status(200).json({ message: "Profile update succesfully" });
+    return res.status(200).json({ message: "Profile update successfully" });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
@@ -135,7 +135,7 @@ export const deleteUser = async (req: Request, res: Response) => {
     const findUser = await User.findByIdAndDelete({ _id });
     return res
       .status(200)
-      .json({ message: "User deleted succesfully", findUser });
+      .json({ message: "User deleted successfully", findUser });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
@@ -155,7 +155,7 @@ export const blockUser = async (req: Request, res: Response) => {
       }
     );
     console.log(findUser);
-    return res.status(200).json({ message: "Blocked succesfully", findUser });
+    return res.status(200).json({ message: "Blocked successfully", findUser });
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong" });
   }
