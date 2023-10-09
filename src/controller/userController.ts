@@ -64,11 +64,12 @@ export const loginUser = async (req: Request, res: Response) => {
         res.cookie("refreshToken", refreshToken, {
           httpOnly: true,
           secure: true,
+          sameSite: 'strict',
           maxAge: 24 * 60 * 60 * 1000
         })
         return res
           .status(200)
-          .json({ message: "User logged in successfully", token, refreshToken, maxAge: 24 * 60 * 60 * 1000, });
+          .json({ message: "User logged in successfully", token });
       } else {
         return res.status(401).json({ message: "Incorrect password" });
       }
