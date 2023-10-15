@@ -61,15 +61,9 @@ export const loginUser = async (req: Request, res: Response) => {
           { refreshToken: refreshToken },
           { new: true }
         );
-        res.cookie("refreshToken", refreshToken, {
-          httpOnly: true,
-          secure: false,
-          sameSite: 'strict',
-          maxAge: 24 * 60 * 60 * 1000
-        })
         return res
           .status(200)
-          .json({ message: "User logged in successfully", token });
+          .json({ message: "User logged in successfully", token, refreshToken });
       } else {
         return res.status(401).json({ message: "Incorrect password" });
       }
@@ -179,12 +173,12 @@ export const unblockUser = async (req: Request, res: Response) => {
 
 //handle refresh token
 export const handleRefreshToken = async (req: Request, res: Response) => {
-  const cookie = req.cookies;
-  if (!cookie?.refreshToken)
+  const { refreshToken } = req.body;
+  if (!refreshToken)
     return res.status(400).json({ message: "No token attached" });
-  const findUser = await User.findOne({ refreshToken: cookie.refreshToken });
+  const findUser = await User.findOne({ refreshToken });
   if (!findUser) return res.status(401).json({ message: "Token not match" });
-  const decoded = verifyRefreshToken(cookie.refreshToken);
+  const decoded = verifyRefreshToken(refreshToken);
   if (!decoded) {
     return res
       .status(401)
