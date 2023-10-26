@@ -63,7 +63,7 @@ export const loginUser = async (req: Request, res: Response) => {
         );
         return res
           .status(200)
-          .json({ message: "User logged in successfully", token, refreshToken });
+          .json({ message: "User logged in successfully", data: { _id: findUser._id, token, refreshToken } });
       } else {
         return res.status(401).json({ message: "Incorrect password" });
       }
