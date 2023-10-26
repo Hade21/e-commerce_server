@@ -191,7 +191,7 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
 
 //logout
 export const logout = async (req: Request, res: Response) => {
-  const refreshToken = req.cookies?.refreshToken;
+  const { refreshToken } = req.body;
   if (!refreshToken)
     return res.status(400).json({ message: "No token attached" });
   const findUser = await User.findOne({ refreshToken });
