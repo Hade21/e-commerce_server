@@ -196,18 +196,10 @@ export const logout = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "No token attached" });
   const findUser = await User.findOne({ refreshToken });
   if (!findUser) {
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: true,
-    });
-    return res.status(204);
+    return res.status(404).json({ message: "User not found" });
   }
   await User.findOneAndUpdate(refreshToken, {
     refreshToken: "",
-  });
-  res.clearCookie("refreshToken", {
-    httpOnly: true,
-    secure: true,
   });
   return res.status(200).json({ message: "User logged out" });
 };
